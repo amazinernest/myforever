@@ -42,7 +42,7 @@ export async function sendDecisionNotification(event: ProposalEvent): Promise<vo
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `💍 **PROPOSAL ALERT for ${loveStory.myName} & ${loveStory.herName}**\n\n**Decision:** ${payload.decision}\n**Time:** ${payload.localTime}\n**Message:** ${payload.message}`,
+            content: `💍 **PROPOSAL ALERT for ${loveStory.myName} & ${loveStory.herName}**\n\n**Decision:** ${payload.decision}\n**Time:** ${payload.time}\n**Message:** ${payload.message}`,
             embeds: [
               {
                 title: `${loveStory.herName}'s Proposal Response`,
@@ -51,7 +51,7 @@ export async function sendDecisionNotification(event: ProposalEvent): Promise<vo
                   { name: 'Decision', value: payload.decision, inline: true },
                   { name: 'Recipient', value: loveStory.herName, inline: true },
                   { name: 'Sender', value: loveStory.myName, inline: true },
-                  { name: 'Timestamp', value: payload.localTime, inline: false },
+                  { name: 'Timestamp', value: payload.time, inline: false },
                 ],
               },
             ],
