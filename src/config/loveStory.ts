@@ -390,10 +390,7 @@ export const loveStory: StoryConfig = {
     artist: "Ernest, for Praise"
   },
   notificationConfig: {
-    // Paste a Discord webhook, Telegram webhook, or Formspree email endpoint here
-    // Example: webhookUrl: "https://discord.com/api/webhooks/YOUR/WEBHOOK/URL"
-    // Example: formspreeEndpoint: "https://formspree.io/f/your_form_id"
     webhookUrl: "",
-    formspreeEndpoint: ""
+    formspreeEndpoint: "https://formspree.io/f/mvkgqykn"
   }
 };

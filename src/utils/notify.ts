@@ -20,12 +20,13 @@ export async function sendDecisionNotification(event: ProposalEvent): Promise<vo
   const formspreeEndpoint = loveStory.notificationConfig?.formspreeEndpoint;
 
   const payload = {
-    event: 'PROPOSAL_DECISION',
-    herName: loveStory.herName,
-    myName: loveStory.myName,
+    _subject: event.decision === 'YES' 
+      ? `💍 Breathtaking News: ${loveStory.herName} Said YES! ❤️` 
+      : `💭 Proposal Update: ${loveStory.herName} is reading & thinking 😌`,
     decision: event.decision === 'YES' ? '💍 YES! SHE SAID YES ❤️' : '💭 LET ME THINK 😌',
-    timestamp: new Date().toISOString(),
-    localTime: new Date().toLocaleString(),
+    recipient: loveStory.herName,
+    sender: loveStory.myName,
+    time: new Date().toLocaleString(),
     device: navigator.userAgent,
     message: event.decision === 'YES' 
       ? `🎉 Breathtaking news! ${loveStory.herName} tapped YES to your proposal!`
