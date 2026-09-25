@@ -1,7 +1,7 @@
 /**
  * Romantic Ambient Soundtrack Engine
- * Supports custom audio files (e.g. Akon - Escape) with automatic fallback to
- * physical-modeled acoustic piano harmonics via Web Audio API.
+ * Supports custom audio files (Akon - Escape) with gentle volume, 10s starting cue,
+ * and automatic fallback to physical-modeled acoustic piano harmonics via Web Audio API.
  */
 
 class RomanticAudioEngine {
@@ -11,6 +11,7 @@ class RomanticAudioEngine {
   private gainNode: GainNode | null = null;
   private audioElement: HTMLAudioElement | null = null;
   private usingCustomAudio = false;
+  private hasSetInitialTime = false;
 
   // Romantic harmonic progression
   private chords = [
@@ -28,7 +29,7 @@ class RomanticAudioEngine {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new AudioCtxClass();
       this.gainNode = this.ctx.createGain();
-      this.gainNode.gain.value = 0.22;
+      this.gainNode.gain.value = 0.18; // gentle background level
       this.gainNode.connect(this.ctx.destination);
     }
   }
@@ -37,8 +38,15 @@ class RomanticAudioEngine {
     if (!this.audioElement) {
       this.audioElement = new Audio(url);
       this.audioElement.loop = true;
-      this.audioElement.volume = 0.65;
+      this.audioElement.volume = 0.38; // Reduced soft romantic volume
       
+      this.audioElement.addEventListener('loadedmetadata', () => {
+        if (!this.hasSetInitialTime && this.audioElement) {
+          this.audioElement.currentTime = 10; // Start playing from 10 seconds
+          this.hasSetInitialTime = true;
+        }
+      });
+
       // Fallback to synth if custom audio file fails to load
       this.audioElement.onerror = () => {
         console.info('Custom audio file not found, falling back to romantic piano synth.');
@@ -49,10 +57,19 @@ class RomanticAudioEngine {
       };
     }
 
+    if (!this.hasSetInitialTime && this.audioElement) {
+      try {
+        this.audioElement.currentTime = 10;
+        this.hasSetInitialTime = true;
+      } catch {
+        // metadata might still be loading
+      }
+    }
+
     this.usingCustomAudio = true;
     this.isPlaying = true;
     this.audioElement.play().catch(() => {
-      // If blocked or missing, start synth progression
+      // If autoplay policy or load error, fallback smoothly
       this.usingCustomAudio = false;
       this.stepArpeggio();
     });
@@ -79,8 +96,8 @@ class RomanticAudioEngine {
     filter.frequency.exponentialRampToValueAtTime(300, now + duration);
 
     noteGain.gain.setValueAtTime(0.0001, now);
-    noteGain.gain.exponentialRampToValueAtTime(0.35, now + 0.04);
-    noteGain.gain.exponentialRampToValueAtTime(0.12, now + 0.8);
+    noteGain.gain.exponentialRampToValueAtTime(0.3, now + 0.04);
+    noteGain.gain.exponentialRampToValueAtTime(0.1, now + 0.8);
     noteGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
 
     osc1.connect(noteGain);
