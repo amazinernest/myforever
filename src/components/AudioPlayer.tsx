@@ -35,7 +35,7 @@ export const AudioPlayer: React.FC = () => {
             {isPlaying ? "Playing Soundtrack" : "♫ Play Our Soundtrack"}
           </span>
           <span className="text-[10px] text-burgundy-700/80 font-serif italic hidden sm:inline">
-            {loveStory.audioTrack?.title || "Eternal Promise"}
+            {loveStory.audioTrack?.title} — {loveStory.audioTrack?.artist}
           </span>
         </div>
 

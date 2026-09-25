@@ -386,8 +386,9 @@ export const loveStory: StoryConfig = {
     revealedMessage: "P.S. I still think you are ridiculously, breathtakingly beautiful, and you make my heart skip a beat every single time you look at me."
   },
   audioTrack: {
-    title: "Eternal Promise (Acoustic Piano)",
-    artist: "Ernest, for Praise"
+    title: "Escape",
+    artist: "Akon",
+    src: "/escape.mp3"
   },
   notificationConfig: {
     webhookUrl: "",

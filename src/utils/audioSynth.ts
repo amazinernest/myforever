@@ -1,7 +1,7 @@
 /**
- * Romantic Ambient Piano & Harmony Synthesizer
- * Uses Web Audio API with gentle physical-modeled harmonics and soft envelope shaping
- * to create a beautiful, cinematic romantic soundtrack on demand.
+ * Romantic Ambient Soundtrack Engine
+ * Supports custom audio files (e.g. Akon - Escape) with automatic fallback to
+ * physical-modeled acoustic piano harmonics via Web Audio API.
  */
 
 class RomanticAudioEngine {
@@ -10,14 +10,14 @@ class RomanticAudioEngine {
   private timerId: number | null = null;
   private gainNode: GainNode | null = null;
   private audioElement: HTMLAudioElement | null = null;
+  private usingCustomAudio = false;
 
-  // Romantic chord progression (frequencies in Hz)
-  // Dmaj9 -> Bm9 -> Gmaj9 -> Aadd9
+  // Romantic harmonic progression
   private chords = [
-    [146.83, 220.00, 277.18, 369.99, 440.00, 554.37], // Dmaj9 (D3, A3, C#4, F#4, A4, C#5)
-    [123.47, 185.00, 246.94, 293.66, 369.99, 440.00], // Bm9 (B2, F#3, B3, D4, F#4, A4)
-    [98.00, 146.83, 196.00, 293.66, 369.99, 440.00],  // Gmaj9 (G2, D3, G3, D4, F#4, A4)
-    [110.00, 164.81, 220.00, 277.18, 329.63, 440.00]  // Aadd9 (A2, E3, A3, C#4, E4, A4)
+    [146.83, 220.00, 277.18, 369.99, 440.00, 554.37], // Dmaj9
+    [123.47, 185.00, 246.94, 293.66, 369.99, 440.00], // Bm9
+    [98.00, 146.83, 196.00, 293.66, 369.99, 440.00],  // Gmaj9
+    [110.00, 164.81, 220.00, 277.18, 329.63, 440.00]  // Aadd9
   ];
 
   private currentChordIndex = 0;
@@ -37,9 +37,25 @@ class RomanticAudioEngine {
     if (!this.audioElement) {
       this.audioElement = new Audio(url);
       this.audioElement.loop = true;
+      this.audioElement.volume = 0.65;
+      
+      // Fallback to synth if custom audio file fails to load
+      this.audioElement.onerror = () => {
+        console.info('Custom audio file not found, falling back to romantic piano synth.');
+        this.usingCustomAudio = false;
+        if (this.isPlaying) {
+          this.stepArpeggio();
+        }
+      };
     }
-    this.audioElement.play().catch(() => {});
+
+    this.usingCustomAudio = true;
     this.isPlaying = true;
+    this.audioElement.play().catch(() => {
+      // If blocked or missing, start synth progression
+      this.usingCustomAudio = false;
+      this.stepArpeggio();
+    });
   }
 
   private playPianoNote(freq: number, duration = 3.5) {
@@ -47,7 +63,6 @@ class RomanticAudioEngine {
 
     const now = this.ctx.currentTime;
     
-    // Fundamental oscillator (sine with warm triangle blend)
     const osc1 = this.ctx.createOscillator();
     const osc2 = this.ctx.createOscillator();
     const noteGain = this.ctx.createGain();
@@ -56,15 +71,13 @@ class RomanticAudioEngine {
     osc1.frequency.setValueAtTime(freq, now);
 
     osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(freq * 1.002, now); // subtle detune for acoustic warmth
+    osc2.frequency.setValueAtTime(freq * 1.002, now);
 
-    // Low pass filter to create soft warm felt piano tone
     const filter = this.ctx.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(1400, now);
     filter.frequency.exponentialRampToValueAtTime(300, now + duration);
 
-    // Envelope
     noteGain.gain.setValueAtTime(0.0001, now);
     noteGain.gain.exponentialRampToValueAtTime(0.35, now + 0.04);
     noteGain.gain.exponentialRampToValueAtTime(0.12, now + 0.8);
@@ -82,7 +95,7 @@ class RomanticAudioEngine {
   }
 
   private stepArpeggio = () => {
-    if (!this.isPlaying || !this.ctx) return;
+    if (!this.isPlaying || !this.ctx || this.usingCustomAudio) return;
 
     const chord = this.chords[this.currentChordIndex];
     const freq = chord[this.currentNoteIndex];
@@ -95,7 +108,6 @@ class RomanticAudioEngine {
       this.currentChordIndex = (this.currentChordIndex + 1) % this.chords.length;
     }
 
-    // Varied arpeggio timing for natural human feel
     const interval = 580 + (Math.sin(Date.now() / 1000) * 80);
     this.timerId = window.setTimeout(this.stepArpeggio, interval);
   };
@@ -106,25 +118,26 @@ class RomanticAudioEngine {
       this.ctx.resume();
     }
 
-    if (customUrl) {
-      if (this.isPlaying) {
-        this.audioElement?.pause();
-        this.isPlaying = false;
-      } else {
-        this.playCustomAudio(customUrl);
-      }
-      return this.isPlaying;
-    }
-
     if (this.isPlaying) {
       this.isPlaying = false;
-      if (this.timerId) clearTimeout(this.timerId);
+      if (this.audioElement) {
+        this.audioElement.pause();
+      }
+      if (this.timerId) {
+        clearTimeout(this.timerId);
+      }
+      return false;
+    }
+
+    // Start playing
+    if (customUrl) {
+      this.playCustomAudio(customUrl);
     } else {
       this.isPlaying = true;
       this.stepArpeggio();
     }
 
-    return this.isPlaying;
+    return true;
   }
 
   public getPlayingState(): boolean {
