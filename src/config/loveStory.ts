@@ -100,6 +100,10 @@ export interface StoryConfig {
     artist: string;
     src?: string; // If provided, uses this audio URL. If empty, uses the built-in procedural romantic piano synth
   };
+  notificationConfig?: {
+    webhookUrl?: string; // Discord, Telegram, or custom webhook URL for instant phone alerts
+    formspreeEndpoint?: string; // Formspree or EmailJS endpoint for instant email notifications
+  };
 }
 
 export const loveStory: StoryConfig = {
@@ -384,5 +388,12 @@ export const loveStory: StoryConfig = {
   audioTrack: {
     title: "Eternal Promise (Acoustic Piano)",
     artist: "Ernest, for Praise"
+  },
+  notificationConfig: {
+    // Paste a Discord webhook, Telegram webhook, or Formspree email endpoint here
+    // Example: webhookUrl: "https://discord.com/api/webhooks/YOUR/WEBHOOK/URL"
+    // Example: formspreeEndpoint: "https://formspree.io/f/your_form_id"
+    webhookUrl: "",
+    formspreeEndpoint: ""
   }
 };

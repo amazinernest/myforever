@@ -4,12 +4,14 @@ import confetti from 'canvas-confetti';
 import { loveStory } from '../config/loveStory';
 import { ThreeRingCanvas } from './ThreeRingCanvas';
 import { Heart, Sparkles, CheckCircle2, RefreshCw } from 'lucide-react';
+import { sendDecisionNotification } from '../utils/notify';
 
 export const SectionProposal: React.FC = () => {
   const [answer, setAnswer] = useState<'none' | 'yes' | 'think'>('none');
 
   const triggerCelebration = () => {
     setAnswer('yes');
+    sendDecisionNotification({ decision: 'YES', timestamp: new Date().toISOString() });
 
     // Multi-stage refined gold & rose confetti
     const duration = 5 * 1000;
@@ -37,6 +39,11 @@ export const SectionProposal: React.FC = () => {
     };
 
     frame();
+  };
+
+  const handleLetMeThink = () => {
+    setAnswer('think');
+    sendDecisionNotification({ decision: 'LET_ME_THINK', timestamp: new Date().toISOString() });
   };
 
   return (
@@ -134,7 +141,7 @@ export const SectionProposal: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={() => setAnswer('think')}
+                  onClick={handleLetMeThink}
                   className="w-full sm:w-auto px-7 py-4 rounded-full glass-burgundy text-ivory-300 hover:text-ivory-100 font-sans font-medium text-xs tracking-widest uppercase transition-all duration-300 border border-ivory-400/20"
                 >
                   <span>{loveStory.proposal.thinkButtonText}</span>
